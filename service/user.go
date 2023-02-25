@@ -94,7 +94,7 @@ func (service *UserService) Login() serializer.Response {
 			Msg:    pkg.GetMsg(code),
 		}
 	}
-	token, err := util.GenerateToken(user.ID, service.UserName, 0)
+	token, err := util.GenerateToken(user.Uid, service.UserName, 0)
 	if err != nil {
 		util.LogrusObj.Info(err)
 		code = pkg.ErrorAuthToken

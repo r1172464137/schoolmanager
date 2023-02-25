@@ -9,23 +9,23 @@ import (
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
-	Id        uint   `json:"id"`
+	Uid       uint   `json:"uid"`
 	Username  string `json:"username"`
 	Authority int    `json:"authority"`
 	jwt.StandardClaims
 }
 
 // GenerateToken 签发用户Token
-func GenerateToken(id uint, username string, authority int) (string, error) {
+func GenerateToken(uid uint, username string, authority int) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(24 * time.Hour)
 	claims := Claims{
-		Id:        id,
+		Uid:       uid,
 		Username:  username,
 		Authority: authority,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
-			Issuer:    "to-do-list",
+			Issuer:    "school_manager",
 		},
 	}
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
