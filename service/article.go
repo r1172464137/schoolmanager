@@ -107,7 +107,7 @@ func (s *ShowArticle) Show() serializer.Response {
 func (u *UpdateArticle) Update(id uint) serializer.Response {
 	code := pkg.SUCCESS
 	var user model.User
-	err := model.DB.Model(&model.User{}).Where("id = ?").First(&user).Error
+	err := model.DB.Model(&model.User{}).Where("id = ?", id).First(&user).Error
 	if err != nil {
 		code = pkg.ErrorDatabase
 		util.LogrusObj.Info(err)
