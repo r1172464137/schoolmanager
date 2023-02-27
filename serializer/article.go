@@ -17,3 +17,11 @@ func BuildArticle(article model.Article) Article {
 		Publisher: article.Publisher,
 	}
 }
+
+func BuildArticles(ArticleIn []model.Article) (ArticleOut []Article) {
+	for _, forArticle := range ArticleIn {
+		article := BuildArticle(forArticle)
+		ArticleOut = append(ArticleOut, article)
+	}
+	return ArticleOut
+}

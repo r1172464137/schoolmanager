@@ -31,6 +31,9 @@ func NewRouter() *gin.Engine {
 			auth.POST("leave", api.CreateLeave)
 			auth.GET("leave", api.ShowLeave)
 			auth.PUT("leave", api.UpdateLeave)
+			auth.POST("article", api.CreateArticle)
+			auth.GET("article", api.ShowArticle)
+			auth.PUT("article", api.UpdateArticle)
 		}
 	}
 	return r
