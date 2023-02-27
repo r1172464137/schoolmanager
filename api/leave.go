@@ -30,3 +30,15 @@ func ShowLeave(c *gin.Context) {
 		util.LogrusObj.Info(err)
 	}
 }
+
+func UpdateLeave(c *gin.Context) {
+	updateLeave := service.UpdateLeave{}
+	chaim, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&updateLeave); err == nil {
+		res := updateLeave.Update(chaim.Uid)
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		util.LogrusObj.Info(err)
+	}
+}

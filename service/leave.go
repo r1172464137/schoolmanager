@@ -21,7 +21,7 @@ type CreateLeave struct {
 }
 
 type UpdateLeave struct {
-	ID     uint `json:"id" form:"uid" binding:""`
+	ID     uint `json:"id" form:"id" binding:""`
 	Uid    uint `json:"uid" form:"uid" binding:""`
 	Status uint `json:"status" form:"status" binding:""`
 }
@@ -61,11 +61,11 @@ func (s *ShowLeave) Show(uid uint) serializer.Response {
 	var user model.User
 	model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user)
 	if user.Capacity != true { //老师，可以查看所有自己学院下的信息
-		var leaves []model.Leave
-		err := model.DB.Model(&model.Leave{}).Find(&leaves).Error
+		var studentLeave []model.Leave
+		err := model.DB.Model(&model.Leave{}).Where("uid = ?", uid).Find(&studentLeave).Error
 		if err != nil {
-			util.LogrusObj.Info(err)
 			code = pkg.ErrorDatabase
+			util.LogrusObj.Info(err)
 			return serializer.Response{
 				Status: code,
 				Msg:    pkg.GetMsg(code),
@@ -75,15 +75,15 @@ func (s *ShowLeave) Show(uid uint) serializer.Response {
 		code = pkg.SUCCESS
 		return serializer.Response{
 			Status: code,
-			Data:   serializer.BuildLeaves(leaves),
+			Data:   serializer.BuildLeaves(studentLeave),
 			Msg:    pkg.GetMsg(code),
 		}
 	}
-	var studentLeave []model.Leave
-	err := model.DB.Model(&model.Leave{}).Where("uid = ?", uid).Find(&studentLeave).Error
+	var leaves []model.Leave
+	err := model.DB.Model(&model.Leave{}).Find(&leaves).Error
 	if err != nil {
-		code = pkg.ErrorDatabase
 		util.LogrusObj.Info(err)
+		code = pkg.ErrorDatabase
 		return serializer.Response{
 			Status: code,
 			Msg:    pkg.GetMsg(code),
@@ -93,19 +93,19 @@ func (s *ShowLeave) Show(uid uint) serializer.Response {
 	code = pkg.SUCCESS
 	return serializer.Response{
 		Status: code,
-		Data:   serializer.BuildLeaves(studentLeave),
+		Data:   serializer.BuildLeaves(leaves),
 		Msg:    pkg.GetMsg(code),
 	}
 
 }
 
 // 更新申请（其实就是批准申请）
-func (u *UpdateLeave) Update(uid string) serializer.Response {
+func (u *UpdateLeave) Update(uid uint) serializer.Response {
 	code := pkg.SUCCESS
 	var user model.User
 	model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user)
-	if user.Capacity != false {
-		code = pkg.ErrorExistUser
+	if user.Capacity == false { //身份为学生
+		code = pkg.ErrorDatabase
 		return serializer.Response{
 			Status: code,
 			//Data:   nil,
@@ -113,9 +113,9 @@ func (u *UpdateLeave) Update(uid string) serializer.Response {
 			Error: "error user in use",
 		}
 	}
-	var leave model.Leave
-	leave.Status = u.Status
-	err := model.DB.Model(&model.Leave{}).Where("id = ?", u.ID).Select("status").Save(&leave).Error
+	//var leave model.Leave
+	//leave.Status = u.Status
+	err := model.DB.Model(&model.Leave{}).Where("id = ?", u.ID).Update("status", u.Status).Error
 	if err != nil {
 		code = pkg.ErrorDatabase
 		return serializer.Response{
@@ -124,6 +124,8 @@ func (u *UpdateLeave) Update(uid string) serializer.Response {
 			Error:  err.Error(),
 		}
 	}
+	//leave.Status = u.Status
+	//model.DB.Save(&leave)
 	code = pkg.SUCCESS
 	return serializer.Response{
 		Status: code,

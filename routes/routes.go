@@ -30,6 +30,7 @@ func NewRouter() *gin.Engine {
 		{
 			auth.POST("leave", api.CreateLeave)
 			auth.GET("leave", api.ShowLeave)
+			auth.PUT("leave", api.UpdateLeave)
 		}
 	}
 	return r
