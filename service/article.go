@@ -17,8 +17,8 @@ type ShowArticle struct {
 
 // 更新公告的服务
 type UpdateArticle struct {
-	Uid     uint   `form:"uid" json:"uid"`
-	Title   string `form:"title" json:"title" binding:"required,min=2,max=100"`
+	ID      uint   `form:"id" json:"id"`
+	Title   string `form:"title" json:"title" binding:"max=100"`
 	Content string `form:"content" json:"content" binding:"max=1000"`
 	//Status  int    `form:"status" json:"status"` // 0 待办   1已完成
 }
@@ -55,7 +55,7 @@ func (c *CreateArticle) Create(id uint) serializer.Response {
 	article.Tile = c.Title
 	article.Content = c.Content
 	article.Publisher = id
-	err = model.DB.Save(&user).Error
+	err = model.DB.Save(&article).Error
 	if err != nil {
 		util.LogrusObj.Info(err)
 		code = pkg.ErrorDatabase
@@ -104,10 +104,10 @@ func (s *ShowArticle) Show() serializer.Response {
 	}
 }
 
-func (u *UpdateArticle) Update(id uint) serializer.Response {
+func (u *UpdateArticle) Update(uid uint) serializer.Response {
 	code := pkg.SUCCESS
 	var user model.User
-	err := model.DB.Model(&model.User{}).Where("id = ?", id).First(&user).Error
+	err := model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user).Error
 	if err != nil {
 		code = pkg.ErrorDatabase
 		util.LogrusObj.Info(err)
@@ -126,9 +126,25 @@ func (u *UpdateArticle) Update(id uint) serializer.Response {
 			Error:  err.Error(),
 		}
 	}
-	var article = model.Article{
-		Tile:    u.Title,
-		Content: u.Content,
+	var article model.Article
+	err = model.DB.Model(&model.Article{}).Where("id = ?", u.ID).First(&article).Error
+	if err != nil {
+		code = pkg.ErrorDatabase
+		util.LogrusObj.Info(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    pkg.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	if u.Title == "" {
+	} else {
+		article.Tile = u.Title
+	}
+
+	if u.Content != "" {
+		article.Content = u.Content
+	} else {
 	}
 	err = model.DB.Save(&article).Error
 	if err != nil {

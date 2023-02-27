@@ -10,7 +10,7 @@ func CreateArticle(c *gin.Context) {
 	createArticle := service.CreateArticle{}
 	chaim, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&createArticle); err == nil {
-		res := createArticle.Create(uint(chaim.Uid))
+		res := createArticle.Create(chaim.Uid)
 		c.JSON(200, res)
 	} else {
 		c.JSON(400, ErrorResponse(err))
