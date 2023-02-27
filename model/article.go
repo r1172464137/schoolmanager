@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type Article struct {
 	//ID        uint   `gorm:"type:int;primaryKey;not null"`
 	gorm.Model
-	Tile      string `gorm:"type:varchar(20);not null"`
-	Content   string `gorm:"type:varchar(50);not null"`
-	Publisher uint   `gorm:"type:int;not null"`
+	Tile      string `gorm:"not null"`
+	Content   string `gorm:"not null"`
+	Publisher uint   `gorm:"not null"`
 }
