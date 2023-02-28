@@ -33,9 +33,10 @@ func ShowLeave(c *gin.Context) {
 
 func UpdateLeave(c *gin.Context) {
 	updateLeave := service.UpdateLeave{}
+	id := c.Param("id")
 	chaim, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&updateLeave); err == nil {
-		res := updateLeave.Update(chaim.Uid)
+		res := updateLeave.Update(chaim.Uid, id)
 		c.JSON(200, res)
 	} else {
 		c.JSON(400, ErrorResponse(err))

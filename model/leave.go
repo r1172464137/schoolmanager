@@ -12,4 +12,5 @@ type Leave struct {
 	Time   uint   `gorm:"size:7"`
 	Reason string `gorm:"type:varchar(50)"`
 	Status uint   `gorm:"type:bool;default:2"` //0 申请成功 1申请失败  2 申请中
+	Digest string `gorm:"not null"`
 }

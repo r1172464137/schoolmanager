@@ -17,7 +17,7 @@ type ShowArticle struct {
 
 // 更新公告的服务
 type UpdateArticle struct {
-	ID      uint   `form:"id" json:"id"`
+	//ID      uint   `form:"id" json:"id"`
 	Title   string `form:"title" json:"title" binding:"max=100"`
 	Content string `form:"content" json:"content" binding:"max=1000"`
 	//Status  int    `form:"status" json:"status"` // 0 待办   1已完成
@@ -104,7 +104,7 @@ func (s *ShowArticle) Show() serializer.Response {
 	}
 }
 
-func (u *UpdateArticle) Update(uid uint) serializer.Response {
+func (u *UpdateArticle) Update(uid uint, id string) serializer.Response {
 	code := pkg.SUCCESS
 	var user model.User
 	err := model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user).Error
@@ -127,7 +127,7 @@ func (u *UpdateArticle) Update(uid uint) serializer.Response {
 		}
 	}
 	var article model.Article
-	err = model.DB.Model(&model.Article{}).Where("id = ?", u.ID).First(&article).Error
+	err = model.DB.Model(&model.Article{}).Where("id = ?", id).First(&article).Error
 	if err != nil {
 		code = pkg.ErrorDatabase
 		util.LogrusObj.Info(err)
@@ -160,6 +160,52 @@ func (u *UpdateArticle) Update(uid uint) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Data:   serializer.BuildArticle(article),
+		Msg:    pkg.GetMsg(code),
+	}
+}
+
+func (d *DeleteArticle) DeleteArticle(uid uint, id string) serializer.Response {
+	code := pkg.SUCCESS
+	var user model.User
+	err := model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user).Error
+	if err != nil {
+		code = pkg.ErrorDatabase
+		util.LogrusObj.Info(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    pkg.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	if user.Capacity != true {
+		code = pkg.ErrorDatabase
+		util.LogrusObj.Info(err)
+		return serializer.Response{
+			Status: code,
+			Msg:    pkg.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	var article model.Article
+	if err := model.DB.Where("id = ?", id).First(&article).Error; err != nil {
+		code = pkg.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    pkg.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	if err := model.DB.Delete(&article).Error; err != nil {
+		code = pkg.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    pkg.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	code = pkg.SUCCESS
+	return serializer.Response{
+		Status: code,
 		Msg:    pkg.GetMsg(code),
 	}
 }

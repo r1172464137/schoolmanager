@@ -32,9 +32,23 @@ func ShowArticle(c *gin.Context) {
 
 func UpdateArticle(c *gin.Context) {
 	updateArticle := service.UpdateArticle{}
+	id := c.Param("id")
 	chaim, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&updateArticle); err == nil {
-		res := updateArticle.Update(chaim.Uid)
+		res := updateArticle.Update(chaim.Uid, id)
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		util.LogrusObj.Info(err)
+	}
+}
+
+func DeleteArticle(c *gin.Context) {
+	deleteArticle := service.DeleteArticle{}
+	id := c.Param("id")
+	chaim, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&deleteArticle); err == nil {
+		res := deleteArticle.DeleteArticle(chaim.Uid, id)
 		c.JSON(200, res)
 	} else {
 		c.JSON(400, ErrorResponse(err))

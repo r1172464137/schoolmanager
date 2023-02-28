@@ -18,11 +18,12 @@ type CreateLeave struct {
 	Name   string `json:"name" form:"name" binding:""`
 	Reason string `json:"reason" form:"reason" binding:""`
 	Time   uint   `json:"time" form:"time" binding:""`
+	Digest string `json:"digest" form:"digest" binding:""`
 }
 
 type UpdateLeave struct {
-	ID     uint `json:"id" form:"id" binding:""`
-	Uid    uint `json:"uid" form:"uid" binding:""`
+	//ID uint `json:"id" form:"id" binding:""`
+	//Uid    uint `json:"uid" form:"uid" binding:""`
 	Status uint `json:"status" form:"status" binding:""`
 }
 
@@ -37,6 +38,7 @@ func (createLeave *CreateLeave) Create(uid uint) serializer.Response {
 		Reason: createLeave.Reason,
 		Time:   createLeave.Time,
 		Status: 3,
+		Digest: util.RandSeq(30),
 	}
 	code := pkg.SUCCESS
 	err := model.DB.Create(&leave).Error
@@ -100,7 +102,7 @@ func (s *ShowLeave) Show(uid uint) serializer.Response {
 }
 
 // 更新申请（其实就是批准申请）
-func (u *UpdateLeave) Update(uid uint) serializer.Response {
+func (u *UpdateLeave) Update(uid uint, id string) serializer.Response {
 	code := pkg.SUCCESS
 	var user model.User
 	model.DB.Model(&model.User{}).Where("uid = ?", uid).First(&user)
@@ -115,7 +117,7 @@ func (u *UpdateLeave) Update(uid uint) serializer.Response {
 	}
 	//var leave model.Leave
 	//leave.Status = u.Status
-	err := model.DB.Model(&model.Leave{}).Where("id = ?", u.ID).Update("status", u.Status).Error
+	err := model.DB.Model(&model.Leave{}).Where("id = ?", id).Update("status", u.Status).Error
 	if err != nil {
 		code = pkg.ErrorDatabase
 		return serializer.Response{
